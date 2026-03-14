@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thinkora AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="chat-app">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">⚡</div>
+            <h2>Thinkora</h2>
+            <span class="badge">AI</span>
+        </div>
+
+        <div class="sidebar-actions">
+            <button class="sidebar-btn" onclick="clearChat()">
+                <span class="btn-icon">🗑️</span> New Chat
+            </button>
+        </div>
+
+        <div class="chat-list" style="flex: 1; overflow-y: auto;">
+            <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.75rem; padding-left: 0.25rem;">Recent Chats</div>
+            {% for chat in recent_chats %}
+            <button class="chat-item-btn" onclick="loadChat({{ chat.id }})" title="{{ chat.title }}">
+                <span style="opacity: 0.7; margin-right: 0.4rem;">💬</span> {{ chat.title }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">{{ username[0]|upper }}</div>
+                <span>{{ username }}</span>
+            </div>
+            <a href="/logout" class="logout-link">Sign out →</a>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="chat-area">
+
+        <div class="header">
+            <div class="header-left">
+                <span class="status-dot"></span>
+                <span class="header-title">Thinkora Assistant</span>
+            </div>
+            <div class="header-right">
+                <span class="model-badge">Thinkora AI • Local</span>
+            </div>
+        </div>
+
+        <div id="messages" class="messages">
+            <div class="welcome-card" style="max-width: 700px;">
+                <div class="welcome-icon">✨</div>
+                <h3>Welcome to Thinkora</h3>
+                <p>An elite AI exactly like ChatGPT and Gemini. How can I help you today?</p>
+                
+                <div class="capabilities-grid">
+                    <div class="capability" onclick="startCapability('Can you give me a comprehensive overview of Data Structures and Algorithms with code examples in Python and Java?')" style="cursor: pointer;">
+                        <div class="icon">💻</div>
+                        <h4>Coding & DSA Expert</h4>
+                        <p>Write, learn, or debug code flawlessly in Python, Java, C, C++, Ruby, PHP, SQL & MySQL.</p>
+                    </div>
+                    <div class="capability" onclick="startCapability('What is the weather like right now in Central London, and what are the best parks to visit nearby?')" style="cursor: pointer;">
+                        <div class="icon">🌍</div>
+                        <h4>Geocoded Weather & Parks</h4>
+                        <p>Get real-time weather and the best parks, beaches, & places for ANY Country, State, or Area.</p>
+                    </div>
+                    <div class="capability" onclick="startCapability('Explain how machine learning and neural networks work as if I were a beginner.')" style="cursor: pointer;">
+                        <div class="icon">🎓</div>
+                        <h4>Education & Theories</h4>
+                        <p>Deep-dive explanations into complex tech theories, algorithms, and general studies.</p>
+                    </div>
+                    <div class="capability" onclick="startCapability('Write a vivid, highly emotional short story about an astronaut discovering a new planet.')" style="cursor: pointer;">
+                        <div class="icon">📖</div>
+                        <h4>Creative Storyteller</h4>
+                        <p>Generate vivid, immersive stories and creative writing exactly like a human author.</p>
+                    </div>
+                </div>
+
+                <div class="suggestion-chips">
+                    <button class="chip" onclick="useSuggestion(this)">Weather & Parks near Miami, FL</button>
+                    <button class="chip" onclick="useSuggestion(this)">Code a bubble sort in Java</button>
+                    <button class="chip" onclick="useSuggestion(this)">Explain SQL Joins simply</button>
+                    <button class="chip" onclick="useSuggestion(this)">Write a story about a sci-fi city</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input id="msg" placeholder="Message Thinkora..." autocomplete="off" onkeydown="handleKey(event)">
+                <button id="send-btn" onclick="sendMessage()" title="Send message">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+            <div class="input-footer">Developed by <span style="font-weight: bold; color: var(--primary);">Jayavarshini</span> • Thinkora AI</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+function handleKey(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function getTimestamp() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function addMessage(text, type) {
+    // Remove welcome card if present
+    const welcome = document.querySelector('.welcome-card');
+    if (welcome) welcome.remove();
+
+    const container = document.getElementById("messages");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message-wrapper", type);
+
+    const avatar = document.createElement("div");
+    avatar.classList.add("msg-avatar");
+    avatar.textContent = type === "user" ? "Y" : "⚡";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message", type);
+
+    const content = document.createElement("div");
+    content.classList.add("msg-content");
+    
+    // Check if it's already rendered markdown (for the bot) or just normal text (for user)
+    if (type === "bot") {
+        content.innerHTML = text ? marked.parse(text) : "";
+    } else {
+        content.textContent = text;
+    }
+
+    const time = document.createElement("div");
+    time.classList.add("msg-time");
+    time.textContent = getTimestamp();
+
+    bubble.appendChild(content);
+    
+    if (type === "bot") {
+        const copyBtn = document.createElement("button");
+        copyBtn.innerHTML = "📋"; // Copy icon
+        copyBtn.classList.add("copy-btn");
+        copyBtn.title = "Copy response";
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(content.innerText);
+            copyBtn.innerHTML = "✅";
+            setTimeout(() => copyBtn.innerHTML = "📋", 2000);
+        };
+        bubble.appendChild(copyBtn);
+    }
+    
+    if (type === "user") {
+        const editBtn = document.createElement("button");
+        editBtn.innerHTML = "✎"; // Edit icon
+        editBtn.classList.add("edit-btn");
+        editBtn.title = "Edit message";
+        editBtn.onclick = () => editMessage(wrapper, text);
+        bubble.appendChild(editBtn);
+    }
+    
+    bubble.appendChild(time);
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+
+    return content;
+}
+
+function showTypingIndicator() {
+    const container = document.getElementById("messages");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message-wrapper", "bot");
+    wrapper.id = "typing-wrapper";
+
+    const avatar = document.createElement("div");
+    avatar.classList.add("msg-avatar");
+    avatar.textContent = "⚡";
+
+    const indicator = document.createElement("div");
+    indicator.classList.add("message", "bot", "typing-indicator");
+    indicator.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(indicator);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const el = document.getElementById("typing-wrapper");
+    if (el) el.remove();
+}
+
+function editMessage(wrapperElement, originalText) {
+    // Put text back into input field
+    const input = document.getElementById("msg");
+    input.value = originalText;
+    input.focus();
+
+    // Remove this message and all subsequent messages from the UI
+    let el = wrapperElement;
+    while(el) {
+        let next = el.nextElementSibling;
+        el.remove();
+        el = next;
+    }
+
+    // Clear typing indicator if any
+    removeTypingIndicator();
+
+    // Tell backend to truncate chat history from this message onwards
+    fetch("/edit-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: originalText })
+    });
+}
+
+function useSuggestion(btn) {
+    document.getElementById("msg").value = btn.textContent;
+    sendMessage();
+}
+
+function startCapability(query) {
+    document.getElementById("msg").value = query;
+    sendMessage();
+}
+
+function sendMessage() {
+    const input = document.getElementById("msg");
+    const message = input.value.trim();
+    if (!message) return;
+
+    addMessage(message, "user");
+    input.value = "";
+    input.focus();
+
+    document.getElementById("send-btn").disabled = true;
+    showTypingIndicator();
+
+    // Use the streaming endpoint
+    fetch("/chat-stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+    }).then(response => {
+        removeTypingIndicator();
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let botContent = null;
+        let fullText = "";
+        let buffer = "";
+
+        function read() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    document.getElementById("send-btn").disabled = false;
+                    if (!fullText.trim() && botContent) {
+                        botContent.textContent = "I'm still learning and don't quite know what to say.";
+                    }
+                    return;
+                }
+
+                const chunk = decoder.decode(value, { stream: true });
+                buffer += chunk;
+                
+                let lines = buffer.split("\n\n");
+                // Keep the last partial chunk in the buffer
+                buffer = lines.pop();
+
+                for (const block of lines) {
+                    const blockLines = block.split("\n");
+                    for (const line of blockLines) {
+                        if (line.startsWith("data: ")) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+
+                                if (data.done) {
+                                    document.getElementById("send-btn").disabled = false;
+                                    return;
+                                }
+
+                                if (data.token) {
+                                    if (!botContent) {
+                                        botContent = addMessage("", "bot");
+                                    }
+                                    fullText += data.token;
+                                    botContent.innerHTML = marked.parse(fullText);
+
+                                    // Auto-scroll
+                                    const container = document.getElementById("messages");
+                                    container.scrollTop = container.scrollHeight;
+                                }
+                            } catch (e) {
+                                console.error("Error parsing JSON:", e, line);
+                            }
+                        }
+                    }
+                }
+
+                read();
+            });
+        }
+
+        read();
+
+    }).catch(err => {
+        removeTypingIndicator();
+        addMessage("Sorry, something went wrong. Please try again.", "bot");
+        document.getElementById("send-btn").disabled = false;
+    });
+}
+
+function clearChat() {
+    const container = document.getElementById("messages");
+    container.innerHTML = `
+        <div class="welcome-card" style="max-width: 700px;">
+            <div class="welcome-icon">✨</div>
+            <h3>Chat Cleared</h3>
+            <p>An elite AI exactly like ChatGPT and Gemini. How can I help you today?</p>
+            
+            <div class="capabilities-grid">
+                <div class="capability" onclick="startCapability('Can you give me a comprehensive overview of Data Structures and Algorithms with code examples in Python and Java?')" style="cursor: pointer;">
+                    <div class="icon">💻</div>
+                    <h4>Coding & DSA Expert</h4>
+                    <p>Write, learn, or debug code flawlessly in Python, Java, C, C++, Ruby, PHP, SQL & MySQL.</p>
+                </div>
+                <div class="capability" onclick="startCapability('What is the weather like right now in Central London, and what are the best parks to visit nearby?')" style="cursor: pointer;">
+                    <div class="icon">🌍</div>
+                    <h4>Geocoded Weather & Parks</h4>
+                    <p>Get real-time weather and the best parks, beaches, & places for ANY Country, State, or Area.</p>
+                </div>
+                <div class="capability" onclick="startCapability('Explain how machine learning and neural networks work as if I were a beginner.')" style="cursor: pointer;">
+                    <div class="icon">🎓</div>
+                    <h4>Education & Theories</h4>
+                    <p>Deep-dive explanations into complex tech theories, algorithms, and general studies.</p>
+                </div>
+                <div class="capability" onclick="startCapability('Write a vivid, highly emotional short story about an astronaut discovering a new planet.')" style="cursor: pointer;">
+                    <div class="icon">📖</div>
+                    <h4>Creative Storyteller</h4>
+                    <p>Generate vivid, immersive stories and creative writing exactly like a human author.</p>
+                </div>
+            </div>
+
+            <div class="suggestion-chips">
+                <button class="chip" onclick="useSuggestion(this)">Weather & Parks near Miami, FL</button>
+                <button class="chip" onclick="useSuggestion(this)">Code a bubble sort in Java</button>
+                <button class="chip" onclick="useSuggestion(this)">Explain SQL Joins simply</button>
+                <button class="chip" onclick="useSuggestion(this)">Write a story about a sci-fi city</button>
+            </div>
+        </div>`;
+    fetch("/clear-history", { method: "POST" });
+}
+
+function loadChat(chatId) {
+    fetch(`/load-chat/${chatId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            
+            const container = document.getElementById("messages");
+            container.innerHTML = ""; // Clear current chat
+            
+            data.history.forEach(msg => {
+                addMessageForHistory(msg.content, msg.role);
+            });
+        });
+}
+
+function addMessageForHistory(text, type) {
+    const container = document.getElementById("messages");
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message-wrapper", type);
+
+    const avatar = document.createElement("div");
+    avatar.classList.add("msg-avatar");
+    avatar.textContent = type === "user" ? "Y" : "⚡";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message", type);
+
+    const content = document.createElement("div");
+    content.classList.add("msg-content");
+    
+    if (type === "bot") {
+        content.innerHTML = text ? marked.parse(text) : "";
+    } else {
+        content.textContent = text;
+    }
+
+    const time = document.createElement("div");
+    time.classList.add("msg-time");
+    time.textContent = getTimestamp();
+
+    bubble.appendChild(content);
+    
+    if (type === "bot") {
+        const copyBtn = document.createElement("button");
+        copyBtn.innerHTML = "📋";
+        copyBtn.classList.add("copy-btn");
+        copyBtn.title = "Copy response";
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(content.innerText);
+            copyBtn.innerHTML = "✅";
+            setTimeout(() => copyBtn.innerHTML = "📋", 2000);
+        };
+        bubble.appendChild(copyBtn);
+    }
+    
+    if (type === "user") {
+        const editBtn = document.createElement("button");
+        editBtn.innerHTML = "✎";
+        editBtn.classList.add("edit-btn");
+        editBtn.title = "Edit message";
+        editBtn.onclick = () => editMessage(wrapper, text);
+        bubble.appendChild(editBtn);
+    }
+    
+    bubble.appendChild(time);
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>

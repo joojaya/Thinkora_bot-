@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Thinkora AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+            background: #09090b;
+            color: #fafafa;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: orbit 8s ease-in-out infinite;
+        }
+        body::before {
+            width: 400px; height: 400px;
+            background: #6366f1;
+            top: -100px; left: -100px;
+        }
+        body::after {
+            width: 350px; height: 350px;
+            background: #a855f7;
+            bottom: -100px; right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes orbit {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(40px, 30px); }
+        }
+
+        .login-container {
+            background: rgba(28, 28, 33, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 2.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+            width: 380px;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-section { text-align: center; margin-bottom: 2rem; }
+
+        .logo-icon {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 16px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.35);
+        }
+
+        .logo-section h2 { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.35rem; }
+        .logo-section p { color: #71717a; font-size: 0.85rem; }
+
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #a1a1aa; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.02em; }
+
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 0.8rem 1rem;
+            background: rgba(39, 39, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px; color: #fafafa; font-size: 0.95rem;
+            font-family: inherit; outline: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        input::placeholder { color: #52525b; }
+
+        .login-btn {
+            width: 100%; padding: 0.9rem;
+            background: linear-gradient(135deg, #6366f1, #7c3aed);
+            color: white; border: none; border-radius: 10px;
+            cursor: pointer; font-size: 0.95rem; font-weight: 500;
+            font-family: inherit; transition: all 0.2s; margin-top: 0.5rem;
+        }
+        .login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35); }
+        .login-btn:active { transform: translateY(0); }
+
+        .error {
+            color: #f87171; text-align: center; margin-bottom: 1.25rem;
+            font-size: 0.85rem; padding: 0.65rem; border-radius: 8px;
+            background: rgba(248, 113, 113, 0.08);
+            border: 1px solid rgba(248, 113, 113, 0.15);
+        }
+
+        .switch-link {
+            text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #71717a;
+        }
+        .switch-link a {
+            color: #6366f1; text-decoration: none; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .switch-link a:hover { color: #818cf8; }
+
+        .footer-text { text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #3f3f46; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo-icon">⚡</div>
+            <h2>Welcome Back</h2>
+            <p>Sign in to continue to Thinkora AI</p>
+        </div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="login-btn">Sign In →</button>
+        </form>
+
+        <div class="switch-link">
+            Don't have an account? <a href="/signup">Create one</a>
+        </div>
+
+        <div class="footer-text">Developed by <span style="font-weight: bold; color: #6366f1;">Jayavarshini</span> • Thinkora AI</div>
+    </div>
+</body>
+</html>

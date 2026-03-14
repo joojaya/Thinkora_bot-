@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up — Thinkora AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+            background: #09090b;
+            color: #fafafa;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: orbit 8s ease-in-out infinite;
+        }
+        body::before {
+            width: 400px; height: 400px;
+            background: #6366f1;
+            top: -100px; right: -100px;
+        }
+        body::after {
+            width: 350px; height: 350px;
+            background: #a855f7;
+            bottom: -100px; left: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes orbit {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-30px, 40px); }
+        }
+
+        .signup-container {
+            background: rgba(28, 28, 33, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 2.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5);
+            width: 380px;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-section { text-align: center; margin-bottom: 2rem; }
+
+        .logo-icon {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            border-radius: 16px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.35);
+        }
+
+        .logo-section h2 { font-size: 1.35rem; font-weight: 600; margin-bottom: 0.35rem; }
+        .logo-section p { color: #71717a; font-size: 0.85rem; }
+
+        .form-group { margin-bottom: 1.15rem; }
+        label { display: block; margin-bottom: 0.45rem; color: #a1a1aa; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.02em; }
+
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 0.8rem 1rem;
+            background: rgba(39, 39, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px; color: #fafafa; font-size: 0.95rem;
+            font-family: inherit; outline: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2); }
+        input::placeholder { color: #52525b; }
+
+        .signup-btn {
+            width: 100%; padding: 0.9rem;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            color: white; border: none; border-radius: 10px;
+            cursor: pointer; font-size: 0.95rem; font-weight: 500;
+            font-family: inherit; transition: all 0.2s; margin-top: 0.5rem;
+        }
+        .signup-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(168, 85, 247, 0.35); }
+        .signup-btn:active { transform: translateY(0); }
+
+        .error {
+            color: #f87171; text-align: center; margin-bottom: 1.15rem;
+            font-size: 0.85rem; padding: 0.65rem; border-radius: 8px;
+            background: rgba(248, 113, 113, 0.08);
+            border: 1px solid rgba(248, 113, 113, 0.15);
+        }
+
+        .switch-link {
+            text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #71717a;
+        }
+        .switch-link a {
+            color: #a855f7; text-decoration: none; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .switch-link a:hover { color: #c084fc; }
+
+        .footer-text { text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #3f3f46; }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="logo-section">
+            <div class="logo-icon">🚀</div>
+            <h2>Create Account</h2>
+            <p>Join Thinkora AI and start chatting</p>
+        </div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form action="/signup" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your password" required>
+            </div>
+            <button type="submit" class="signup-btn">Create Account →</button>
+        </form>
+
+        <div class="switch-link">
+            Already have an account? <a href="/">Sign in</a>
+        </div>
+
+        <div class="footer-text">Developed by <span style="font-weight: bold; color: #a855f7;">Jayavarshini</span> • Thinkora AI</div>
+    </div>
+</body>
+</html>
