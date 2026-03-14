@@ -1,1 +1,2 @@
-# Thinkora_bot-
+ Thinkora_bot-
+Thinkora AI Chatbot is an intelligent web-based chatbot application built using Python and modern web technologies. The system runs on a local development server and provides an interactive conversational interface powered by AI. It includes a clean user interface, real-time response generation, and a scalable backend designed for building smart assistants, automation tools, and AI-driven web applications.
