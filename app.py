@@ -6,9 +6,13 @@ import hashlib
 import os
 
 app = Flask(__name__)
-app.secret_key = "thinkora-secret"
+app.secret_key = os.environ.get("SECRET_KEY", "thinkora-secret")
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
+# In a Vercel serverless environment, only /tmp is writable.
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/users.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
 
 
 def init_db():
